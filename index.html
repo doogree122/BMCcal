@@ -55,6 +55,74 @@
     box-shadow: var(--bmc-shadow-lg); border-top: 4px solid var(--bmc-accent);
     padding: 22px 24px 24px; margin: 18px 0 26px;
     display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: start;
+    cursor: pointer;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }
+  .bmc-featured:hover, .bmc-featured:focus-visible {
+    box-shadow: 0 10px 34px rgba(26, 37, 64, 0.16);
+    transform: translateY(-1px);
+    outline: none;
+  }
+  .bmc-featured-hint {
+    font-size: 11px; color: var(--bmc-muted); margin-top: 10px;
+    letter-spacing: 0.05em;
+  }
+  /* Modal overlay. Constrained to whatever container renders this page —
+     inside a ShulCloud iframe, it will cover the iframe area only. */
+  .bmc-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 24, 35, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .bmc-modal.open { opacity: 1; pointer-events: auto; }
+  .bmc-modal-card {
+    background: var(--bmc-card);
+    border-radius: var(--bmc-radius);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.30);
+    max-width: 560px; width: 100%;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    padding: 26px 28px 24px;
+    position: relative;
+  }
+  .bmc-modal-close {
+    position: absolute; top: 12px; right: 12px;
+    background: none; border: none;
+    font-size: 22px; line-height: 1;
+    color: var(--bmc-muted); cursor: pointer;
+    padding: 6px 10px; border-radius: 6px;
+  }
+  .bmc-modal-close:hover { background: #f1f1f3; color: var(--bmc-ink); }
+  .bmc-modal-eyebrow {
+    font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--bmc-accent-dk); font-weight: 700; margin-bottom: 8px;
+  }
+  .bmc-modal-eyebrow.celebration { color: var(--bmc-celebrate-dk); }
+  .bmc-modal-eyebrow.opportunity { color: var(--bmc-muted); }
+  .bmc-modal-title {
+    font-family: var(--bmc-font); font-size: 22px; color: var(--bmc-ink);
+    margin: 0 0 4px; font-weight: 600; line-height: 1.2;
+    padding-right: 28px;
+  }
+  .bmc-modal-date { font-size: 13px; color: var(--bmc-ink-soft); margin: 0 0 14px; }
+  .bmc-modal-meta {
+    font-size: 13px; color: var(--bmc-ink-soft);
+    padding: 10px 0; border-top: 1px solid var(--bmc-rule);
+  }
+  .bmc-modal-meta strong { color: var(--bmc-ink); font-weight: 600; }
+  .bmc-modal-notes {
+    font-size: 14px; color: var(--bmc-ink); line-height: 1.55;
+    padding-top: 12px; margin-top: 10px;
+    border-top: 1px solid var(--bmc-rule);
+    white-space: pre-wrap;
   }
   .bmc-featured-date {
     text-align: center; min-width: 84px; padding: 10px 6px;
@@ -199,31 +267,45 @@
   <ul class="bmc-list" id="bmc-list"></ul>
 </div>
 
+<div class="bmc-modal" id="bmc-modal" role="dialog" aria-modal="true" aria-labelledby="bmc-modal-title" hidden>
+  <div class="bmc-modal-card">
+    <button class="bmc-modal-close" id="bmc-modal-close" aria-label="Close">&times;</button>
+    <div class="bmc-modal-eyebrow" id="bmc-modal-eyebrow"></div>
+    <h3 class="bmc-modal-title" id="bmc-modal-title"></h3>
+    <p class="bmc-modal-date" id="bmc-modal-date"></p>
+    <div class="bmc-modal-meta" id="bmc-modal-meta"></div>
+    <div class="bmc-modal-notes" id="bmc-modal-notes"></div>
+  </div>
+</div>
+
 <script>
 const EVENTS = [
   {
     "date": "2026-08-09",
     "number": 1,
-    "title": "Orientation & Brunch Pot Luck",
-    "unit": "Sharing Our Blessings",
+    "title": "Orientation & Pot Luck",
+    "unit": "Welcome BMC Families!",
     "lead": "Ori & Erin",
-    "time": "11 AM  - 1 PM"
+    "time": "11 AM  - 1 PM",
+    "notes": "We'll gather, get to know each other and create blessings for this coming year."
   },
   {
     "date": "2026-08-16",
     "number": 2,
-    "title": "Groundbreaking plus Study Session",
-    "unit": "Jewish History & Identity",
+    "title": "Study & Social",
+    "unit": "Groundbreaking + Jewish History & Identity",
     "lead": "Ori & David",
-    "time": "10 AM"
+    "time": "9:30AM Groundbreaking / 12PM BMC Gathering",
+    "notes": "9:30AM - Groundbreaking Event\n12PM - BMC Session"
   },
   {
     "date": "2026-08-22",
     "number": 3,
     "title": "Mazel Tov Anslee Shain!",
-    "unit": "Ritual & Meaning",
+    "unit": "9:15 AM Chai Five Session / 10 AM Join Service & Simcha",
     "lead": "Erin",
-    "time": "9:15 AM Chai Five Session, 10 AM Join Service"
+    "time": "9:15 AM - Kiddush",
+    "notes": "9:15am - Cereal Bar\n9:30am - Opening Session\n10am - Join the Service\n12pm - Enjoy lunch as a cohort!"
   },
   {
     "date": "2026-08-29",
@@ -236,7 +318,7 @@ const EVENTS = [
     "date": "2026-08-30",
     "number": 4,
     "title": "Mach Shai + Kadima",
-    "unit": "Jewish History & Identity (Social program to follow)",
+    "unit": "Jewish History & Identity - 1 PM Kadima Event",
     "lead": "David",
     "time": "9 AM - 12 PM"
   },
@@ -325,7 +407,7 @@ const EVENTS = [
   {
     "date": "2026-11-08",
     "number": null,
-    "title": "Mach Shai — Tefila",
+    "title": "Mach Shai \u2014 Tefila",
     "unit": "",
     "time": "9:00 AM"
   },
@@ -340,7 +422,7 @@ const EVENTS = [
     "date": "2026-11-15",
     "number": 10,
     "title": "Mach Shai + Kadima",
-    "unit": "Jewish History & Identity (Social program to follow)",
+    "unit": "Jewish History & Identity 1 PM Kadima Event",
     "lead": "David",
     "time": "9 AM - 12 PM"
   },
@@ -400,7 +482,7 @@ const EVENTS = [
     "date": "2027-01-10",
     "number": 14,
     "title": "Mach Shai (Late Start) + Kadima",
-    "unit": "Jewish History & Identity (Social program to follow)",
+    "unit": "Jewish History & Identity 1 PM Kadima Event",
     "lead": "David",
     "time": "10:30 AM - 12 PM"
   },
@@ -436,7 +518,7 @@ const EVENTS = [
   {
     "date": "2027-01-30",
     "number": 16,
-    "title": "Study — Sisterhood Shabbat",
+    "title": "Study \u2014 Sisterhood Shabbat",
     "unit": "Chai Five: Torah & Jewish Values",
     "lead": "Ori",
     "time": "9:15 AM"
@@ -452,7 +534,7 @@ const EVENTS = [
     "date": "2027-02-07",
     "number": 17,
     "title": "Mach Shai + Kadima",
-    "unit": "Jewish History & Identity (Social program to follow)",
+    "unit": "Jewish History & Identity 1 PM Kadima Event",
     "lead": "David",
     "time": "9 AM - 12 PM"
   },
@@ -519,7 +601,7 @@ const EVENTS = [
     "date": "2027-03-28",
     "number": 21,
     "title": "Mach Shai + Kadima",
-    "unit": "Jewish History & Identity (Social program to follow)",
+    "unit": "Jewish History & Identity 1 PM Kadima Event",
     "lead": "David",
     "time": "9 AM - 12 PM"
   },
@@ -542,7 +624,7 @@ const EVENTS = [
   {
     "date": "2027-05-02",
     "number": 23,
-    "title": "Mach Shai — Last Day Celebration",
+    "title": "Mach Shai \u2014 Last Day Celebration",
     "unit": "Reflect & Connect",
     "lead": "",
     "time": "9 AM - 12 PM"
@@ -580,6 +662,13 @@ const EVENTS = [
     if (/^mazel tov\b/i.test(e.title || "")) return "celebration";
     return "opportunity";
   }
+  // Format a unit/description for display: HTML-escape, then wrap a literal
+  // "1 PM" in the same time-style span used for start times, when it appears
+  // immediately before "Kadima Event" (the five Kadima rows).
+  function formatUnit(s) {
+    const esc = escapeHtml(s);
+    return esc.replace(/(1 PM)( Kadima Event)/g, '<span class="bmc-item-time">$1</span>$2');
+  }
   // For list rows only: when an event is BOTH a numbered gathering AND a
   // Mazel Tov week, emit both classes so the row gets the split gradient
   // (purple on the left, gold on the right). The featured card keeps using
@@ -597,6 +686,79 @@ const EVENTS = [
     if (/^mazel tov\b/i.test(e.title || "")) return "Celebration";
     return "Opportunity";
   }
+
+  // ----- Modal ------------------------------------------------------------
+  const modal = document.getElementById("bmc-modal");
+  const modalEls = {
+    eyebrow: document.getElementById("bmc-modal-eyebrow"),
+    title:   document.getElementById("bmc-modal-title"),
+    date:    document.getElementById("bmc-modal-date"),
+    meta:    document.getElementById("bmc-modal-meta"),
+    notes:   document.getElementById("bmc-modal-notes"),
+  };
+  let lastFocused = null;
+
+  function openModal(event) {
+    lastFocused = document.activeElement;
+    const kind = kindOf(event);
+    const badgeText = badgeOf(event);
+    modalEls.eyebrow.textContent = badgeText;
+    modalEls.eyebrow.className = "bmc-modal-eyebrow " + kind;
+    modalEls.title.textContent = event.title || "";
+    // Long-form date + optional time
+    const d = event._d || parseDate(event.date);
+    const longDate = WEEKDAYS_FULL[d.getDay()] + ", " + MONTHS_FULL[d.getMonth()] +
+                     " " + d.getDate() + ", " + d.getFullYear();
+    modalEls.date.textContent = longDate + (event.time ? "  \u00b7  " + event.time : "");
+    // Meta section: unit, plus lead when present
+    const metaRows = [];
+    if (event.unit) metaRows.push('<div><strong>Details:</strong> ' + escapeHtml(event.unit) + '</div>');
+    if (event.lead) metaRows.push('<div><strong>Lead:</strong> ' + escapeHtml(event.lead) + '</div>');
+    if (metaRows.length) {
+      modalEls.meta.innerHTML = metaRows.join('');
+      modalEls.meta.hidden = false;
+    } else {
+      modalEls.meta.innerHTML = '';
+      modalEls.meta.hidden = true;
+    }
+    // Notes (may not exist yet on older event data)
+    const notes = (event.notes || "").trim();
+    if (notes) {
+      modalEls.notes.textContent = notes;
+      modalEls.notes.hidden = false;
+    } else {
+      modalEls.notes.textContent = "";
+      modalEls.notes.hidden = true;
+    }
+    // Show
+    modal.hidden = false;
+    // Force reflow so the opacity transition triggers
+    void modal.offsetWidth;
+    modal.classList.add("open");
+    document.body.style.overflow = "hidden";
+    // Focus the close button so keyboard users can dismiss immediately
+    setTimeout(function () {
+      const btn = document.getElementById("bmc-modal-close");
+      if (btn) btn.focus();
+    }, 50);
+  }
+
+  function closeModal() {
+    modal.classList.remove("open");
+    document.body.style.overflow = "";
+    setTimeout(function () { modal.hidden = true; }, 150);
+    if (lastFocused && lastFocused.focus) lastFocused.focus();
+  }
+
+  document.getElementById("bmc-modal-close").addEventListener("click", closeModal);
+  modal.addEventListener("click", function (ev) {
+    // Close when clicking the backdrop, not the card itself.
+    if (ev.target === modal) closeModal();
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape" && modal.classList.contains("open")) closeModal();
+  });
+  // ------------------------------------------------------------------------
 
   const today = todayLocal();
   const upcoming = EVENTS
@@ -621,7 +783,7 @@ const EVENTS = [
     if (next.time && next.number != null && next.number !== "") meta.push('<span><strong>' + escapeHtml(next.time) + '</strong></span>');
 
     featuredSlot.innerHTML =
-      '<div class="bmc-featured ' + kind + '">' +
+      '<div class="bmc-featured ' + kind + '" role="button" tabindex="0" aria-haspopup="dialog">' +
         '<div class="bmc-featured-date">' +
           '<div class="bmc-featured-month">' + MONTHS[d.getMonth()] + '</div>' +
           '<div class="bmc-featured-day">' + d.getDate() + '</div>' +
@@ -637,8 +799,22 @@ const EVENTS = [
             '<span><strong>' + WEEKDAYS_FULL[d.getDay()] + ', ' + MONTHS_FULL[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() + '</strong></span>' +
             meta.join("") +
           '</div>' +
+          '<div class="bmc-featured-hint">Click for details &rsaquo;</div>' +
         '</div>' +
       '</div>';
+
+    // Wire up the click / keyboard handlers on the featured card.
+    const card = featuredSlot.querySelector('.bmc-featured');
+    if (card) {
+      const openHandler = function () { openModal(next); };
+      card.addEventListener('click', openHandler);
+      card.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter' || ev.key === ' ') {
+          ev.preventDefault();
+          openHandler();
+        }
+      });
+    }
   }
 
   const list = document.getElementById("bmc-list");
@@ -654,7 +830,7 @@ const EVENTS = [
     const subtitleParts = [];
     // Only show start time for numbered gatherings.
     if (e.time && e.number != null && e.number !== "") subtitleParts.push('<span class="bmc-item-time">' + escapeHtml(e.time) + '</span>');
-    if (e.unit) subtitleParts.push(escapeHtml(e.unit));
+    if (e.unit) subtitleParts.push(formatUnit(e.unit));
     const subtitle = subtitleParts.join(' · ');
     return (
       '<li class="bmc-item ' + kind + '">' +
