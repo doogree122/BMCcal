@@ -74,13 +74,14 @@
     inset: 0;
     background: rgba(20, 24, 35, 0.55);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 20px;
+    padding: 40px 20px 20px;
     z-index: 1000;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.15s ease;
+    overflow-y: auto;
   }
   .bmc-modal.open { opacity: 1; pointer-events: auto; }
   .bmc-modal-card {
